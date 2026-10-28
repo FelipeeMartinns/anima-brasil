@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel do administrador — Anima Brasil{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-extrabold text-slate-900">Painel do administrador</h1>
+    <p class="text-slate-500 mt-1">Controle de perfis, animações, enquetes e mensagens.</p>
+
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+            <p class="text-2xl font-extrabold text-primary">{{ total_animacoes }}</p>
+            <p class="text-xs text-slate-500 mt-1">Animações</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+            <p class="text-2xl font-extrabold text-fuchsia-600">{{ total_usuarios }}</p>
+            <p class="text-xs text-slate-500 mt-1">Usuários</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+            <p class="text-2xl font-extrabold text-amber-500">{{ aguardando }}</p>
+            <p class="text-xs text-slate-500 mt-1">Aguardando aprovação</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+            <p class="text-2xl font-extrabold text-red-500">{{ bloqueadas }}</p>
+            <p class="text-xs text-slate-500 mt-1">Animações bloqueadas</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+            <p class="text-2xl font-extrabold text-rose-500">{{ perfis_bloqueados }}</p>
+            <p class="text-xs text-slate-500 mt-1">Perfis bloqueados</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+            <p class="text-2xl font-extrabold text-emerald-500">{{ enquetes_abertas }}</p>
+            <p class="text-xs text-slate-500 mt-1">Enquetes abertas</p>
+        </div>
+    </div>
+
+    <div class="mt-8 grid md:grid-cols-2 gap-6">
+        <a href="{% url 'moderacao:listar_animacoes' %}" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md hover:border-primary transition group">
+            <p class="text-3xl mb-3">🎬</p>
+            <h2 class="text-lg font-extrabold text-slate-900 group-hover:text-primary">Gerenciar animações</h2>
+            <p class="text-sm text-slate-500 mt-1">Aprovar, bloquear, apagar ou destacar animações.</p>
+        </a>
+        <a href="{% url 'moderacao:listar_perfis' %}" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md hover:border-primary transition group">
+            <p class="text-3xl mb-3">👥</p>
+            <h2 class="text-lg font-extrabold text-slate-900 group-hover:text-primary">Gerenciar perfis</h2>
+            <p class="text-sm text-slate-500 mt-1">Bloquear, desbloquear, apagar perfis e enviar mensagens.</p>
+        </a>
+        <a href="{% url 'moderacao:enquetes' %}" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md hover:border-primary transition group">
+            <p class="text-3xl mb-3">📊</p>
+            <h2 class="text-lg font-extrabold text-slate-900 group-hover:text-primary">Gerenciar enquetes</h2>
+            <p class="text-sm text-slate-500 mt-1">Criar enquetes e acompanhar resultados.</p>
+        </a>
+        <a href="{% url 'admin:index' %}" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md hover:border-primary transition group">
+            <p class="text-3xl mb-3">⚙️</p>
+            <h2 class="text-lg font-extrabold text-slate-900 group-hover:text-primary">Django Admin</h2>
+            <p class="text-sm text-slate-500 mt-1">Acesso completo ao painel oficial do Django.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

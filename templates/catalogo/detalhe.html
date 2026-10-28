@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ animacao.titulo }} — Anima Brasil{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <a href="{% url 'catalogo:catalogo' %}" class="text-sm text-slate-500 hover:text-primary">&larr; Voltar ao catálogo</a>
+
+    <div class="mt-4 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="grid md:grid-cols-2">
+            <div class="bg-slate-100 flex items-center justify-center min-h-[280px]">
+                {% if animacao.imagem %}
+                    <img src="{{ animacao.imagem.url }}" alt="{{ animacao.titulo }}" class="w-full h-full object-cover max-h-[420px]">
+                {% elif animacao.imagem_url %}
+                    <img src="{{ animacao.imagem_url }}" alt="{{ animacao.titulo }}" class="w-full h-full object-cover max-h-[420px]">
+                {% else %}
+                    <div class="text-8xl">🎬</div>
+                {% endif %}
+            </div>
+            <div class="p-6 md:p-8 flex flex-col">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-900">{{ animacao.titulo }}</h1>
+                        <p class="text-slate-500 mt-1">{{ animacao.ano_lancamento }} &middot; {{ animacao.duracao }} minutos</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-slate-800 text-white text-xs font-bold whitespace-nowrap">
+                        {{ animacao.get_classificacao_display }}
+                    </span>
+                </div>
+
+                <div class="mt-4 text-sm space-y-2 text-slate-600">
+                    <p><strong class="text-slate-800">Direção:</strong> {{ animacao.diretor }}</p>
+                    <p><strong class="text-slate-800">Estúdio:</strong> {{ animacao.estudio }}</p>
+                    {% if animacao.criador %}
+                    <p>
+                        <strong class="text-slate-800">Cadastrado por:</strong>
+                        <a href="{% url 'accounts:perfil' animacao.criador.username %}" class="text-primary hover:underline">
+                            {{ animacao.criador.username }}
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    {% for tag in animacao.tags.all %}
+                        <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs border border-purple-100">#{{ tag.nome }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6 flex items-center gap-4">
+                    <a href="#"
+                       data-curtir="{% url 'catalogo:curtir' animacao.pk %}"
+                       class="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition
+                              {% if ja_curtiu %}border-pink-300 bg-pink-50 text-pink-600{% else %}border-slate-200 text-slate-400 hover:text-pink-600{% endif %}">
+                        <span class="text-xl"><span class="icone-coracao">{% if ja_curtiu %}&#9829;{% else %}&#9825;{% endif %}</span></span>
+                        <span class="curtidas-total">{{ animacao.total_curtidas }}</span>
+                    </a>
+                    <a href="#"
+                       data-favoritar="{% url 'catalogo:favoritar' animacao.pk %}"
+                       class="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition
+                              {% if ja_favoritou %}border-yellow-300 bg-yellow-50 text-yellow-600{% else %}border-slate-200 text-slate-400 hover:text-yellow-500{% endif %}">
+                        <span class="text-xl">&#11088;</span>
+                        <span class="favoritos-total">{{ animacao.total_favoritos }}</span>
+                    </a>
+                    <a href="{% url 'catalogo:detalhe' animacao.pk %}#comentarios"
+                       class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-slate-500 text-sm font-semibold hover:text-primary transition">
+                        <span>&#128172;</span> {{ animacao.total_comentarios }}
+                    </a>
+                </div>
+
+                {% if not user.is_authenticated %}
+                <p class="text-xs text-slate-400 mt-4">
+                    <a href="{% url 'accounts:login' %}" class="text-primary font-semibold hover:underline">Entre</a> para curtir, favoritar e comentar.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8 border-t border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900">Sinopse</h2>
+            <p class="mt-2 text-slate-600 leading-relaxed">{{ animacao.sinopse }}</p>
+
+            {% if animacao.link %}
+            <a href="{{ animacao.link }}" target="_blank" rel="noopener noreferrer"
+               class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-escuro text-white font-semibold hover:bg-primary transition">
+                ▶ Assistir animação
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user == animacao.criador or user.is_staff or user.is_superuser %}
+    <div class="mt-4 flex gap-3">
+        <a href="{% url 'catalogo:editar' animacao.pk %}" class="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-300 transition">Editar ficha</a>
+    </div>
+    {% endif %}
+
+    <section id="comentarios" class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Comentários ({{ animacao.total_comentarios }})</h2>
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'catalogo:comentar' animacao.pk %}" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
+            {% csrf_token %}
+            <textarea name="conteudo" rows="3" required placeholder="O que achou dessa animação?"
+                      class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none"></textarea>
+            <div class="mt-3 text-right">
+                <button type="submit" class="px-5 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-purple-700 transition">
+                    Comentar
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <p class="text-sm text-slate-500 mb-6 bg-white rounded-xl border border-dashed border-slate-300 p-4 text-center">
+            <a href="{% url 'accounts:login' %}" class="text-primary font-semibold hover:underline">Entre</a> para comentar.
+        </p>
+        {% endif %}
+
+        {% if comentarios %}
+        <div class="space-y-4">
+            {% for comentario in comentarios %}
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <a href="{% url 'accounts:perfil' comentario.usuario.username %}" class="font-semibold text-slate-800 hover:text-primary transition">
+                        {{ comentario.usuario.username }}
+                    </a>
+                    <span class="text-xs text-slate-400">{{ comentario.criado_em|date:"d/m/Y H:i" }}</span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">{{ comentario.conteudo }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-500 text-center py-8">Nenhum comentário ainda. Seja o primeiro!</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

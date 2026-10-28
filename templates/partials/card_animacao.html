@@ -1,0 +1,25 @@
+{% load static %}
+<a href="{% url 'catalogo:detalhe' animacao.pk %}" class="group block bg-white rounded-xl shadow-sm hover:shadow-lg transition overflow-hidden border border-slate-100">
+    <div class="aspect-video w-full overflow-hidden bg-slate-200 flex items-center justify-center">
+        {% if animacao.imagem %}
+            <img src="{{ animacao.imagem.url }}" alt="{{ animacao.titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        {% elif animacao.imagem_url %}
+            <img src="{{ animacao.imagem_url }}" alt="{{ animacao.titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+        {% else %}
+            <div class="text-5xl opacity-40">🎬</div>
+        {% endif %}
+    </div>
+    <div class="p-4">
+        <h3 class="font-bold text-slate-900 group-hover:text-primary transition line-clamp-1">{{ animacao.titulo }}</h3>
+        <p class="text-xs text-slate-500 mt-1">{{ animacao.diretor }} &middot; {{ animacao.ano_lancamento }}</p>
+        <div class="flex flex-wrap gap-1 mt-2">
+            {% for tag in animacao.tags.all|slice:":3" %}
+                <span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs border border-purple-100">{{ tag.nome }}</span>
+            {% endfor %}
+        </div>
+        <div class="flex items-center justify-between mt-3 text-xs text-slate-500">
+            <span>⏱ {{ animacao.duracao }} min</span>
+            <span class="font-medium text-pink-600">&#9829; {{ animacao.n_curtidas }}</span>
+        </div>
+    </div>
+</a>

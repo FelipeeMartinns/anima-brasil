@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ acao }} animação — Anima Brasil{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-extrabold text-slate-900">{{ acao }} animação</h1>
+    <p class="text-slate-500 mt-1">Preencha os dados para catalogar uma animação brasileira independente.</p>
+
+    <form method="post" enctype="multipart/form-data" class="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-5">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="bg-red-100 text-red-800 border border-red-300 rounded-lg p-4 text-sm">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="grid md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.titulo.label }}</label>
+                {{ form.titulo|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.titulo.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.ano_lancamento.label }}</label>
+                {{ form.ano_lancamento|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.ano_lancamento.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.diretor.label }}</label>
+                {{ form.diretor|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.diretor.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.estudio.label }}</label>
+                {{ form.estudio|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.estudio.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.classificacao.label }}</label>
+                {{ form.classificacao|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.classificacao.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.duracao.label }}</label>
+                {{ form.duracao|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.duracao.errors }}
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.sinopse.label }}</label>
+            {{ form.sinopse|add_class:"w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+            {{ form.sinopse.errors }}
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.imagem.label }}</label>
+                {{ form.imagem|add_class:"w-full text-sm" }}
+                <p class="text-xs text-slate-400 mt-1">Ou informe uma URL no campo ao lado.</p>
+                {{ form.imagem.errors }}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.imagem_url.label }}</label>
+                {{ form.imagem_url|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                {{ form.imagem_url.errors }}
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.link.label }}</label>
+            {{ form.link|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+            <p class="text-xs text-slate-400 mt-1">Link onde a animação está hospedada (YouTube, Vimeo, etc).</p>
+            {{ form.link.errors }}
+        </div>
+
+        <div class="bg-slate-50 rounded-xl border border-slate-200 p-5">
+            <p class="text-sm font-semibold text-slate-700 mb-2">{{ form.tags.label }}</p>
+            <p class="text-xs text-slate-500 mb-3">Escolha uma ou mais tags/gêneros:</p>
+            <div class="flex flex-wrap gap-3 max-h-40 overflow-y-auto">
+                {% for checkbox in form.tags %}
+                    <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                    </label>
+                {% endfor %}
+            </div>
+            <div class="mt-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">{{ form.novas_tags.label }}</label>
+                {{ form.novas_tags|add_class:"w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none" }}
+                <p class="text-xs text-slate-400 mt-1">{{ form.novas_tags.help_text }}</p>
+                {{ form.novas_tags.errors }}
+            </div>
+            {{ form.tags.errors }}
+        </div>
+
+        <div class="pt-2 flex gap-3">
+            <button type="submit" class="px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-purple-700 transition">
+                {{ acao }}
+            </button>
+            <a href="{% url 'accounts:dashboard' %}" class="px-6 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

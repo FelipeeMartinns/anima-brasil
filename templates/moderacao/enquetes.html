@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Enquetes — Anima Brasil{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex items-end justify-between flex-wrap gap-3">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Enquetes da comunidade</h1>
+            <p class="text-slate-500 mt-1">Participe e dê sua opinião.</p>
+        </div>
+        {% if user.is_staff or user.is_superuser %}
+        <a href="{% url 'moderacao:criar_enquete' %}" class="px-5 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-purple-700 transition">+ Nova enquete</a>
+        {% endif %}
+    </div>
+
+    {% if abertas %}
+    <section class="mt-8">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4">Em andamento</h2>
+        <div class="grid gap-6 md:grid-cols-2">
+            {% for enquete in abertas %}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col">
+                <p class="text-xs text-slate-400 mb-1">
+                    {% if enquete.encerra_em %}Encerra em {{ enquete.encerra_em|date:"d/m/Y H:i" }}{% else %}Sem prazo definido{% endif %}
+                </p>
+                <h3 class="text-xl font-extrabold text-slate-900">{{ enquete.titulo }}</h3>
+                {% if enquete.descricao %}<p class="text-sm text-slate-500 mt-1">{{ enquete.descricao }}</p>{% endif %}
+
+                {% if enquete.votou %}
+                <div class="mt-4 space-y-3">
+                    <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+                        ✓ Você votou em: <strong>{{ enquete.voto_usuario.opcao.texto }}</strong>
+                    </p>
+                    {% for opcao in enquete.opcoes.all %}
+                    <div>
+                        <div class="flex items-center justify-between text-sm mb-1">
+                            <span class="font-medium text-slate-700">{{ opcao.texto }}</span>
+                            <span class="text-slate-500">{{ opcao.total_votos }} voto{{ opcao.total_votos|pluralize }} ({{ opcao.percentual|floatformat:0 }}%)</span>
+                        </div>
+                        <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-primary to-secundaria" style="width: {{ opcao.percentual|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <form method="post" action="{% url 'moderacao:votar' enquete.pk %}" class="mt-4 flex-1 flex flex-col">
+                    {% csrf_token %}
+                    <div class="space-y-2.5">
+                        {% for opcao in enquete.opcoes.all %}
+                        <label class="flex items-center gap-3 cursor-pointer bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 rounded-xl p-3 transition">
+                            <input type="radio" name="opcao" value="{{ opcao.pk }}" required class="accent-purple-600">
+                            <span class="text-sm font-medium text-slate-700">{{ opcao.texto }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="mt-4 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-purple-700 transition">
+                        Votar
+                    </button>
+                </form>
+                {% if not user.is_authenticated %}
+                <p class="text-xs text-slate-400 mt-2">
+                    <a href="{% url 'accounts:login' %}" class="text-primary hover:underline">Entre</a> para votar.
+                </p>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <p class="mt-8 bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500 text-sm">
+        Nenhuma enquete em andamento no momento.
+    </p>
+    {% endif %}
+
+    {% if encerradas %}
+    <section class="mt-10">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Encerradas</h2>
+        <div class="grid gap-6 md:grid-cols-2">
+            {% for enquete in encerradas %}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 opacity-80">
+                <p class="text-xs text-slate-400 mb-1">Encerrada</p>
+                <h3 class="text-lg font-extrabold text-slate-800">{{ enquete.titulo }}</h3>
+                <div class="mt-4 space-y-3">
+                    {% for opcao in enquete.opcoes.all %}
+                    <div>
+                        <div class="flex items-center justify-between text-sm mb-1">
+                            <span class="font-medium text-slate-600">{{ opcao.texto }}</span>
+                            <span class="text-slate-500">{{ opcao.total_votos }} ({{ opcao.percentual|floatformat:0 }}%)</span>
+                        </div>
+                        <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full bg-slate-300" style="width: {{ opcao.percentual|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

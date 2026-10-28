@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ perfil.nome_estudio|default:perfil.user.username }} — Anima Brasil{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-primary to-secundaria h-24"></div>
+        <div class="px-6 md:px-8 pb-8 -mt-12">
+            <div class="flex flex-col md:flex-row items-start md:items-end gap-4">
+                <div class="w-24 h-24 rounded-full bg-white p-1 shadow-md">
+                    {% if perfil.avatar %}
+                        <img src="{{ perfil.avatar.url }}" alt="" class="w-full h-full rounded-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full rounded-full bg-escuro text-white flex items-center justify-center text-3xl font-bold">
+                            {{ perfil.user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="flex-1">
+                    <h1 class="text-2xl font-extrabold text-slate-900">
+                        {{ perfil.nome_estudio|default:perfil.user.username }}
+                    </h1>
+                    <p class="text-sm text-slate-500">@{{ perfil.user.username }}</p>
+                </div>
+                {% if user == perfil.user %}
+                <a href="{% url 'accounts:editar_perfil' %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition">Editar perfil</a>
+                {% endif %}
+            </div>
+
+            {% if perfil.descricao %}
+            <p class="mt-6 text-slate-600 leading-relaxed">{{ perfil.descricao }}</p>
+            {% else %}
+            <p class="mt-6 text-slate-400 text-sm">Este perfil ainda não possui descrição.</p>
+            {% endif %}
+
+            {% if perfil.instagram or perfil.youtube or perfil.site or perfil.outras_plataformas %}
+            <div class="mt-6 flex flex-wrap gap-2">
+                {% if perfil.instagram %}
+                    <a href="{{ perfil.instagram }}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-pink-100 hover:text-pink-700 transition">📸 Instagram</a>
+                {% endif %}
+                {% if perfil.youtube %}
+                    <a href="{{ perfil.youtube }}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-red-100 hover:text-red-700 transition">▶ YouTube</a>
+                {% endif %}
+                {% if perfil.site %}
+                    <a href="{{ perfil.site }}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-sky-100 hover:text-sky-700 transition">🌐 Site</a>
+                {% endif %}
+            </div>
+            {% if perfil.outras_plataformas %}
+            <div class="mt-3 text-sm text-slate-500">
+                {% for linha in perfil.outras_plataformas.splitlines %}
+                    {% if linha|slice:":8" == "https://" or linha|slice:":7" == "http://" %}
+                        <a href="{{ linha }}" target="_blank" rel="noopener noreferrer" class="block hover:text-primary">{{ linha }}</a>
+                    {% else %}
+                        <span class="block">{{ linha }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Animações de {{ perfil.nome_estudio|default:perfil.user.username }}</h2>
+        {% if animacoes %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {% for animacao in animacoes %}
+                {% include 'partials/card_animacao.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-500 bg-white rounded-xl border border-dashed border-slate-300 p-8 text-center">
+            Nenhuma animação cadastrada ainda.
+        </p>
+        {% endif %}
+    </section>
+
+    {% if comentarios %}
+    <section class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Comentários recentes</h2>
+        <div class="space-y-3">
+            {% for c in comentarios|slice:":5" %}
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <p class="text-sm text-slate-600">{{ c.conteudo }}</p>
+                <a href="{% url 'catalogo:detalhe' c.animacao.pk %}" class="text-xs text-primary hover:underline mt-1 inline-block">
+                    em "{{ c.animacao.titulo }}"
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if favoritos or curtidos %}
+    <section class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Minha atividade</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            {% if favoritos %}
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">⭐ Favoritos ({{ favoritos.count }})</h3>
+                <ul class="space-y-2 text-sm">
+                    {% for f in favoritos %}
+                    <li><a href="{% url 'catalogo:detalhe' f.animacao.pk %}" class="text-slate-600 hover:text-primary">• {{ f.animacao.titulo }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if curtidos %}
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">♥ Curtidas ({{ curtidos.count }})</h3>
+                <ul class="space-y-2 text-sm">
+                    {% for c in curtidos %}
+                    <li><a href="{% url 'catalogo:detalhe' c.animacao.pk %}" class="text-slate-600 hover:text-primary">• {{ c.animacao.titulo }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% elif user == perfil.user %}
+    <section class="mt-10">
+        <p class="text-sm text-slate-500">
+            Dica: seus favoritos e curtidas aparecem neste perfil, mas com visibilidade
+            <strong>{% if perfil.exibir_favoritos %}pública{% else %}privada{% endif %}</strong> e
+            <strong>{% if perfil.exibir_curtidos %}pública{% else %}privada{% endif %}</strong> respectivamente.
+            <a href="{% url 'accounts:editar_perfil' %}" class="text-primary hover:underline">Você pode alterar isso.</a>
+        </p>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

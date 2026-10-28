@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil bloqueado — Anima Brasil{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-20 text-center">
+    <p class="text-6xl mb-4">🚫</p>
+    <h1 class="text-2xl font-extrabold text-slate-900">Perfil bloqueado</h1>
+    <p class="text-slate-600 mt-2">
+        O perfil de <strong>@{{ profile.user.username }}</strong> foi bloqueado pela administração.
+    </p>
+    {% if profile.motivo_bloqueio %}
+    <p class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl p-4">
+        <strong>Motivo:</strong> {{ profile.motivo_bloqueio }}
+    </p>
+    {% endif %}
+    <a href="{% url 'core:index' %}" class="inline-block mt-6 px-5 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-purple-700 transition">Voltar ao início</a>
+</div>
+{% endblock %}

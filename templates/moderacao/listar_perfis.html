@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar perfis — Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">Gerenciar perfis</h1>
+            <p class="text-slate-500 mt-1">{{ page_obj.paginator.count }} perfil{{ page_obj.paginator.count|pluralize }} registrado{{ page_obj.paginator.count|pluralize }}</p>
+        </div>
+        <a href="{% url 'moderacao:painel' %}" class="text-sm text-slate-500 hover:text-primary">&larr; Voltar ao painel</a>
+    </div>
+
+    <div class="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                    <th class="px-4 py-3">Usuário</th>
+                    <th class="px-4 py-3">Estúdio</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for perfil in perfis %}
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-escuro text-white flex items-center justify-center text-xs font-bold">
+                                {{ perfil.user.username|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-800">@{{ perfil.user.username }}</p>
+                                <p class="text-xs text-slate-400">{{ perfil.user.email }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-slate-500">{{ perfil.nome_estudio|default:"—" }}</td>
+                    <td class="px-4 py-3">
+                        {% if perfil.bloqueado %}
+                            <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">Bloqueado</span>
+                        {% else %}
+                            <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">Ativo</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex justify-end gap-1.5 flex-wrap text-xs">
+                            <a href="{% url 'accounts:perfil' perfil.user.username %}" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Ver</a>
+                            {% if perfil.bloqueado %}
+                                <form method="post" action="{% url 'moderacao:desbloquear_perfil' perfil.user.username %}" class="inline">
+                                    {% csrf_token %}
+                                    <button class="px-2.5 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800">Desbloquear</button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'moderacao:bloquear_perfil' perfil.user.username %}" class="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700">Bloquear</a>
+                            {% endif %}
+                            <a href="{% url 'moderacao:enviar_mensagem' perfil.user.username %}" class="px-2.5 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-800">Mensagem</a>
+                            <form method="post" action="{% url 'moderacao:apagar_perfil' perfil.user.username %}" class="inline"
+                                  onsubmit="return confirm('Apagar este usuário e todo o seu conteúdo?')">
+                                {% csrf_token %}
+                                <button class="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700">Apagar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="px-4 py-10 text-center text-slate-500">Nenhum perfil registrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'partials/paginacao.html' %}
+</div>
+{% endblock %}

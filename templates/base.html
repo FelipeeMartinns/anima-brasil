@@ -1,0 +1,36 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Anima Brasil{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+    <script src="{% static 'js/main.js' %}" defer></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800">
+
+    {% include 'partials/navbar.html' %}
+
+    {% if messages %}
+        <div class="max-w-5xl mx-auto mt-4 px-4 space-y-2">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded-lg text-sm font-medium shadow
+                    {% if message.tags == 'success' %}bg-emerald-100 text-emerald-800 border border-emerald-300
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-300
+                    {% elif message.tags == 'warning' %}bg-amber-100 text-amber-800 border border-amber-300
+                    {% else %}bg-sky-100 text-sky-800 border border-sky-300{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>

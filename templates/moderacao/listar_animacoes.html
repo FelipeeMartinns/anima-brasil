@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar animações — Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">Gerenciar animações</h1>
+            <p class="text-slate-500 mt-1">{{ page_obj.paginator.count }} animação{{ page_obj.paginator.count|pluralize }} cadastrada{{ page_obj.paginator.count|pluralize }}</p>
+        </div>
+        <a href="{% url 'moderacao:painel' %}" class="text-sm text-slate-500 hover:text-primary">&larr; Voltar ao painel</a>
+    </div>
+
+    <div class="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                    <th class="px-4 py-3">Título</th>
+                    <th class="px-4 py-3">Ano</th>
+                    <th class="px-4 py-3">Autor</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for animacao in animacoes %}
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 font-semibold text-slate-800">
+                        <a href="{% url 'catalogo:detalhe' animacao.pk %}" class="hover:text-primary">{{ animacao.titulo }}</a>
+                    </td>
+                    <td class="px-4 py-3 text-slate-500">{{ animacao.ano_lancamento }}</td>
+                    <td class="px-4 py-3 text-slate-500">{{ animacao.criador.username|default:"—" }}</td>
+                    <td class="px-4 py-3">
+                        {% if animacao.bloqueada %}
+                            <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">Bloqueada</span>
+                        {% elif animacao.aprovada %}
+                            <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">Aprovada</span>
+                        {% else %}
+                            <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">Em análise</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex justify-end gap-1.5 flex-wrap text-xs">
+                            <a href="{% url 'catalogo:editar' animacao.pk %}" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Editar</a>
+                            <form method="post" action="{% url 'moderacao:toggle_aprovacao' animacao.pk %}">
+                                {% csrf_token %}
+                                <button class="px-2.5 py-1.5 rounded-lg {% if animacao.aprovada %}bg-amber-100 hover:bg-amber-200 text-amber-800{% else %}bg-emerald-100 hover:bg-emerald-200 text-emerald-800{% endif %}">
+                                    {% if animacao.aprovada %}Suspender{% else %}Aprovar{% endif %}
+                                </button>
+                            </form>
+                            {% if animacao.bloqueada %}
+                                <form method="post" action="{% url 'moderacao:desbloquear_animacao' animacao.pk %}" class="inline">
+                                    {% csrf_token %}
+                                    <button class="px-2.5 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800">Desbloquear</button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'moderacao:bloquear_animacao' animacao.pk %}" class="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700">Bloquear</a>
+                            {% endif %}
+                            <form method="post" action="{% url 'moderacao:criar_destaque' animacao.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button class="px-2.5 py-1.5 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-yellow-800">⭐ Destaque</button>
+                            </form>
+                            {% for destaque in animacao.destaques_ativos %}
+                            <form method="post" action="{% url 'moderacao:remover_destaque' destaque.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button class="px-2.5 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800">Remover destaque</button>
+                            </form>
+                            {% endfor %}
+                            <form method="post" action="{% url 'moderacao:apagar_animacao' animacao.pk %}" class="inline"
+                                  onsubmit="return confirm('Apagar definitivamente esta animação?')">
+                                {% csrf_token %}
+                                <button class="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700">Apagar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="px-4 py-10 text-center text-slate-500">Nenhuma animação cadastrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'partials/paginacao.html' %}
+</div>
+{% endblock %}

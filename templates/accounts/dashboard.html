@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Olá, {{ user.username }}!</h1>
+            <p class="text-slate-500 mt-1">Gerencie seu perfil, animações e interações.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'catalogo:criar' %}" class="px-5 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-purple-700 transition">+ Cadastrar animação</a>
+            <a href="{% url 'accounts:editar_perfil' %}" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">Editar perfil</a>
+        </div>
+    </div>
+
+    <a href="{% url 'accounts:perfil' user.username %}" class="inline-block mt-3 text-sm text-primary hover:underline">
+        Ver meu perfil público &rarr;
+    </a>
+
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-center">
+            <p class="text-3xl font-extrabold text-primary">{{ animacoes.count }}</p>
+            <p class="text-sm text-slate-500 mt-1">Animações cadastradas</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-center">
+            <p class="text-3xl font-extrabold text-pink-600">{{ curtidas.count }}</p>
+            <p class="text-sm text-slate-500 mt-1">Curtidas dadas</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-center">
+            <p class="text-3xl font-extrabold text-yellow-500">{{ favoritos.count }}</p>
+            <p class="text-sm text-slate-500 mt-1">Favoritos salvos</p>
+        </div>
+    </div>
+
+    <section class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Minhas animações</h2>
+        {% if animacoes %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {% for animacao in animacoes %}
+                {% include 'partials/card_animacao.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+            <p class="text-4xl mb-3">🎬</p>
+            <p class="font-semibold text-slate-700">Você ainda não cadastrou animações.</p>
+            <a href="{% url 'catalogo:criar' %}" class="inline-block mt-3 text-sm font-semibold text-primary hover:underline">Cadastrar agora</a>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Meus comentários recentes</h2>
+        {% if comentarios %}
+        <div class="space-y-3">
+            {% for c in comentarios %}
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                <p class="text-sm text-slate-600">{{ c.conteudo }}</p>
+                <a href="{% url 'catalogo:detalhe' c.animacao.pk %}" class="text-xs text-primary hover:underline mt-1 inline-block">
+                    em "{{ c.animacao.titulo }}"
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-500">Nenhum comentário ainda.</p>
+        {% endif %}
+    </section>
+
+    <section class="mt-10">
+        <h2 class="text-xl font-extrabold text-slate-900 mb-4">Meus favoritos</h2>
+        {% if favoritos %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {% for f in favoritos %}
+            <a href="{% url 'catalogo:detalhe' f.animacao.pk %}" class="group block bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
+                <div class="aspect-square bg-slate-100 flex items-center justify-center">
+                    {% if f.animacao.imagem %}
+                        <img src="{{ f.animacao.imagem.url }}" alt="" class="w-full h-full object-cover">
+                    {% elif f.animacao.imagem_url %}
+                        <img src="{{ f.animacao.imagem_url }}" alt="" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-3xl">🎬</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs font-semibold p-2 text-slate-700 group-hover:text-primary line-clamp-1">{{ f.animacao.titulo }}</p>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-500">Nenhum favorito ainda.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
